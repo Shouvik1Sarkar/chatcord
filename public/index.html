@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Socket Chat</title>
+
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+      <aside class="sidebar">
+        <!-- Channels -->
+        <div class="sidebar-section">
+          <h3>Channels</h3>
+
+          <ul id="channel-list">
+            <li id="general" class="channel active" data-room="general">
+              # general
+            </li>
+
+            <li id="jokes" class="channel" data-room="jokes"># jokes</li>
+
+            <li id="random" class="channel" data-room="random"># random</li>
+
+            <li id="javascript" class="channel" data-room="javascript">
+              # javascript
+            </li>
+          </ul>
+        </div>
+
+        <!-- Users -->
+        <div class="sidebar-section">
+          <h3>All Users</h3>
+
+          <ul id="user-list">
+            <!-- Users will be added by JavaScript -->
+          </ul>
+        </div>
+      </aside>
+
+      <!-- =========================
+         CHAT AREA
+    ========================== -->
+
+      <main class="chat">
+        <!-- Chat Header -->
+        <header class="chat-header">
+          <h2 id="current-room"># general</h2>
+
+          <!-- Username / Server Join -->
+          <form id="join-form" class="join-form">
+            <input
+              id="username-input"
+              type="text"
+              placeholder="Username"
+              autocomplete="off"
+            />
+
+            <button type="submit">Join</button>
+          </form>
+        </header>
+
+        <!-- =========================
+           NOTIFICATIONS
+      ========================== -->
+
+        <div id="notification-container"></div>
+
+        <!-- =========================
+           MESSAGES
+      ========================== -->
+
+        <section id="messages" class="messages">
+          <!-- Messages will be added by JavaScript -->
+        </section>
+
+        <!-- =========================
+           MESSAGE INPUT
+      ========================== -->
+
+        <form id="message-form" class="message-form">
+          <input
+            id="message-input"
+            type="text"
+            placeholder="Type a message..."
+            autocomplete="off"
+          />
+
+          <button type="submit">Send</button>
+        </form>
+      </main>
+    </div>
+
+    <!-- =========================
+       JOIN CHANNEL POPUP
+       IMPORTANT:
+       This is OUTSIDE the username form.
+  ========================== -->
+
+    <div id="join-popup" class="join-popup hidden">
+      <div class="popup-content">
+        <h3>Join Channel</h3>
+
+        <p id="join-message">Do you want to join this channel?</p>
+
+        <div class="popup-buttons">
+          <button type="button" id="cancel-join">Cancel</button>
+
+          <button type="button" id="confirm-join">Join</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================
+       SOCKET.IO
+  ========================== -->
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Your JavaScript -->
+    <script src="/app.js"></script>
+  </body>
+</html>
