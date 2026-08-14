@@ -74,6 +74,16 @@ io.on("connection", (socket) => {
     socket.emit("get-channel-history", channels[channel_name]);
   });
 
+  socket.on("typing", ({ sender, to }) => {
+    socket.to(to).emit("typing", `${sender} typing...`);
+    socket.emit("typing-self", `Type a message...`);
+  });
+
+  socket.on("after", ({ m, to }) => {
+    io.to(to).emit("after", m);
+    socket.emit("after", m);
+  });
+
   socket.on("disconnect", () => {
     users = users.filter((user) => user.id !== socket.id);
 

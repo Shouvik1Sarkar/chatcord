@@ -12,6 +12,7 @@ let socket = io();
 const message_input_form = document.getElementById("message-form");
 const message_input = document.getElementById("message-input");
 const chat_box = document.getElementById("messages");
+const msg_btn = document.getElementById("msg-sent");
 
 // Username / server join
 const form = document.getElementById("join-form");
@@ -305,6 +306,10 @@ message_input_form.addEventListener("submit", (e) => {
   console.log("chatName-> ", chatName);
   console.log("isChannel-> ", isChannel);
 
+  // message_input.placeholder = "Type a message...";
+  let m = "Type a message...";
+  socket.emit("after", { m, to });
+
   socket.emit("send-message", {
     content,
     to,
@@ -352,4 +357,26 @@ socket.on("recieve message", (msg) => {
   p.innerText = `${msg.sender}:   ${msg.content}`;
 
   chat_box.append(p);
+});
+
+/* =========================================================
+  TYPING
+========================================================= */
+
+message_input.addEventListener("click", () => {
+  // const m = "Type a message...";
+  // socket.emit("after", { m, to });
+  socket.emit("typing", { sender, to });
+});
+
+socket.on("typing", (message) => {
+  message_input.placeholder = message;
+});
+
+socket.on("typing-self", (message) => {
+  message_input.placeholder = "";
+});
+
+socket.on("after", (message) => {
+  message_input.placeholder = message;
 });
