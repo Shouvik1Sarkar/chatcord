@@ -1,6 +1,10 @@
 import express from "express";
 import { createServer } from "http";
 
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env" });
+
 import { Server } from "socket.io";
 
 const app = express();
@@ -8,6 +12,8 @@ const app = express();
 const server = createServer(app);
 
 const io = new Server(server);
+
+const PORT = process.env.PORT;
 
 app.use(express.static("./public"));
 
@@ -91,4 +97,4 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => console.log("SERVER RUNNING AT PORT : ", 3000));
+server.listen(PORT, () => console.log("SERVER RUNNING AT PORT : ", PORT));
