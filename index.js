@@ -1,6 +1,8 @@
 import express from "express";
 import { createServer } from "http";
 
+import { connectRedis } from "./redis_connect.js";
+
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env" });
@@ -96,5 +98,7 @@ io.on("connection", (socket) => {
     console.log("user disconnected");
   });
 });
+
+await connectRedis();
 
 server.listen(PORT, () => console.log("SERVER RUNNING AT PORT: ", PORT));
