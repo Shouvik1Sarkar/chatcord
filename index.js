@@ -97,4 +97,4 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(PORT, () => console.log("SERVER RUNNING AT PORT : ", PORT));
+server.listen(PORT, () => console.log("SERVER RUNNING AT PORT: ", PORT));
