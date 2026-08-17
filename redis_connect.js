@@ -38,4 +38,24 @@ export const disconnectRedis = async () => {
   console.log("REDIS DISCONNECTED");
 };
 
+export const subscribeToChat = async (callback) => {
+  await subscriber.subscribe("chat", callback);
+
+  console.log("SUBSCRIBED TO CHAT");
+};
+
+export const publishChat = async (message) => {
+  await publisher.publish("chat", JSON.stringify(message));
+};
+
+export const subscribeToUserEvents = async (callback) => {
+  await subscriber.subscribe("user-events", callback);
+
+  console.log("SUBSCRIBED TO USER EVENTS");
+};
+
+export const publishUserEvent = async (event) => {
+  await publisher.publish("user-events", JSON.stringify(event));
+};
+
 export { publisher, subscriber };

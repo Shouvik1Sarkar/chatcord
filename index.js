@@ -1,7 +1,16 @@
+/** IMPORT REDIS **/
+// import { connectRedis, subscribeToChat, publishChat } from "./redis_connect.js";
+import {
+  connectRedis,
+  subscribeToChat,
+  publishChat,
+  subscribeToUserEvents,
+  publishUserEvent,
+} from "./redis_connect.js";
+/******************/
+
 import express from "express";
 import { createServer } from "http";
-
-import { connectRedis } from "./redis_connect.js";
 
 import dotenv from "dotenv";
 
@@ -35,7 +44,7 @@ let users = [];
 io.on("connection", (socket) => {
   console.log("a user connected");
 
-  socket.on("join-server", (userName) => {
+  socket.on("join-server", async (userName) => {
     const user = {
       userName,
       id: socket.id,
@@ -43,40 +52,66 @@ io.on("connection", (socket) => {
 
     users.push(user);
 
-    io.emit(`User joined`, { user, users });
+    // io.emit("User joined", { user, users });
+    await publishUserEvent({
+      type: "user-joined",
+      user,
+    });
   });
 
   //   socket.on("join-room", (roomName, cb) => {
-  socket.on("join-room", (roomName) => {
+  socket.on("join-room", async (roomName) => {
     socket.join(roomName);
     // cb(channels[roomName]);
-    io.to(roomName).emit("join-room", roomName);
+    // io.to(roomName).emit("join-room", roomName);
+
+    await publishUserEvent({
+      type: "join-room",
+      roomName,
+    });
   });
 
-  socket.on("send-message", ({ content, to, sender, chatName, isChannel }) => {
-    if (isChannel) {
+  // socket.on("send-message", ({ content, to, sender, chatName, isChannel }) => {
+  //   if (isChannel) {
+  //     const payload = {
+  //       content,
+  //       chatName,
+  //       sender,
+  //     };
+
+  //     io.to(to).emit("new message", payload);
+  //   } else {
+  //     const payload = {
+  //       content,
+  //       chatName: sender,
+  //       sender,
+  //     };
+
+  //     socket.emit("recieve message", payload);
+  //     io.to(to).emit("new message", payload);
+  //   }
+
+  //   if (channels[chatName]) {
+  //     channels[chatName].push({ sender, content });
+  //   }
+  // });
+
+  socket.on(
+    "send-message",
+    async ({ content, to, sender, chatName, isChannel }) => {
       const payload = {
         content,
+        to,
         chatName,
         sender,
+        isChannel,
       };
 
-      io.to(to).emit("new message", payload);
-    } else {
-      const payload = {
-        content,
-        chatName: sender,
-        sender,
-      };
+      console.log(`SERVER ${PORT} PUBLISHING:`, payload);
 
-      socket.emit("recieve message", payload);
-      io.to(to).emit("new message", payload);
-    }
-
-    if (channels[chatName]) {
-      channels[chatName].push({ sender, content });
-    }
-  });
+      await publishChat(payload);
+    },
+  );
 
   socket.on("get-channel-history", (channel_name) => {
     socket.emit("get-channel-history", channels[channel_name]);
@@ -100,5 +135,47 @@ io.on("connection", (socket) => {
 });
 
 await connectRedis();
+
+await subscribeToUserEvents((message) => {
+  const event = JSON.parse(message);
+
+  if (event.type === "user-joined") {
+    const alreadyExists = users.some((user) => user.id === event.user.id);
+
+    if (!alreadyExists) {
+      users.push(event.user);
+    }
+
+    io.emit("User joined", {
+      user: event.user,
+      users,
+    });
+  }
+});
+
+await subscribeToUserEvents((message) => {
+  const event = JSON.parse(message);
+
+  if (event.type === "join-room") {
+    // const alreadyExists = users.some((user) => user.id === event.user.id);
+
+    // if (!alreadyExists) {
+    //   users.push(event.user);
+    // }
+
+    const roomName = event.roomName;
+    io.to(roomName).emit("join-room", roomName);
+    // io.emit("join-room", roomName);
+  }
+});
+
+await subscribeToChat((message) => {
+  const payload = JSON.parse(message);
+
+  console.log(`REDIS MESSAGE RECEIVED ON SERVER ${PORT}:`, payload);
+
+  // Send the message to clients connected to THIS server
+  io.to(payload.to).emit("new message", payload);
+});
 
 server.listen(PORT, () => console.log("SERVER RUNNING AT PORT: ", PORT));
